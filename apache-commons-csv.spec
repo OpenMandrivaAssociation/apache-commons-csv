@@ -3,7 +3,7 @@
 
 Name:             apache-%{short_name}
 Version:          1.0
-Release:          0.1.svn1071189
+Release:          0.2.svn1071189
 Summary:          Utilities to assist with handling of CSV files
 License:          ASL 2.0
 Group:            Development/Java
