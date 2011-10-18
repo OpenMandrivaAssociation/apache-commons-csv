@@ -14,16 +14,16 @@ Source0:          %{name}-%{version}.tar.xz
 BuildArch:        noarch
 
 BuildRequires:    java-devel >= 0:1.6.0
-BuildRequires:    jpackage-utils
+BuildRequires:    jpackage-utils >= 0:1.7.5
 BuildRequires:    junit4
 BuildRequires:    maven
 BuildRequires:    maven-surefire-provider-junit4
 BuildRequires:    apache-commons-parent
 
 Requires:         java >= 0:1.6.0
-Requires:         jpackage-utils
-Requires(post):   jpackage-utils
-Requires(postun): jpackage-utils
+Requires:         jpackage-utils >= 0:1.7.5
+Requires(post):   jpackage-utils >= 0:1.7.5
+Requires(postun): jpackage-utils >= 0:1.7.5
 
 %description
 Commons CSV was started to unify a common and simple interface for
@@ -32,7 +32,7 @@ reading and writing CSV files under an ASL license.
 %package javadoc
 Summary:          API documentation for %{name}
 Group:            Development/Java
-Requires:         jpackage-utils
+Requires:         jpackage-utils >= 0:1.7.5
 
 
 %description javadoc
