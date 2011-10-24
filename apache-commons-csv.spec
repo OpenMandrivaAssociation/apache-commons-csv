@@ -3,7 +3,7 @@
 
 Name:             apache-%{short_name}
 Version:          1.0
-Release:          0.2.svn1071189
+Release:          0.1.svn1071189
 Summary:          Utilities to assist with handling of CSV files
 License:          ASL 2.0
 Group:            Development/Java
@@ -14,16 +14,16 @@ Source0:          %{name}-%{version}.tar.xz
 BuildArch:        noarch
 
 BuildRequires:    java-devel >= 0:1.6.0
-BuildRequires:    jpackage-utils >= 0:1.7.5
+BuildRequires:    jpackage-utils
 BuildRequires:    junit4
 BuildRequires:    maven
 BuildRequires:    maven-surefire-provider-junit4
 BuildRequires:    apache-commons-parent
 
 Requires:         java >= 0:1.6.0
-Requires:         jpackage-utils >= 0:1.7.5
-Requires(post):   jpackage-utils >= 0:1.7.5
-Requires(postun): jpackage-utils >= 0:1.7.5
+Requires:         jpackage-utils
+Requires(post):   jpackage-utils
+Requires(postun): jpackage-utils
 
 %description
 Commons CSV was started to unify a common and simple interface for
@@ -32,7 +32,7 @@ reading and writing CSV files under an ASL license.
 %package javadoc
 Summary:          API documentation for %{name}
 Group:            Development/Java
-Requires:         jpackage-utils >= 0:1.7.5
+Requires:         jpackage-utils
 
 
 %description javadoc
