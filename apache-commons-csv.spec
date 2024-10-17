@@ -7,7 +7,7 @@ Release:          0.2.svn1071189
 Summary:          Utilities to assist with handling of CSV files
 License:          ASL 2.0
 Group:            Development/Java
-URL:              http://commons.apache.org/sandbox/%{base_name}
+URL:              https://commons.apache.org/sandbox/%{base_name}
 # svn export -r 1071189 http://svn.apache.org/repos/asf/commons/sandbox/csv/trunk/ apache-commons-csv-1.0
 # tar caf apache-commons-csv-1.0.tar.xz apache-commons-csv-1.0
 Source0:          %{name}-%{version}.tar.xz
