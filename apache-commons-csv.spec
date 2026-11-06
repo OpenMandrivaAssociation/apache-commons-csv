@@ -1,85 +1,59 @@
-%global base_name       csv
-%global short_name      commons-%{base_name}
+Name:		apache-commons-csv
+Version:	1.14.1
+Release:	1
+Summary:	Reads and writes CSV files
+Group:		Development/Java
+License:	ASL 2.0
+URL:		https://commons.apache.org/proper/commons-csv/
+Source0:	https://github.com/apache/commons-csv/archive/refs/tags/rel/commons-csv-%{version}.tar.gz#/commons-csv-%{version}.tar.gz
 
-Name:             apache-%{short_name}
-Version:          1.0
-Release:          0.2.svn1071189
-Summary:          Utilities to assist with handling of CSV files
-License:          ASL 2.0
-Group:            Development/Java
-URL:              https://commons.apache.org/sandbox/%{base_name}
-# svn export -r 1071189 http://svn.apache.org/repos/asf/commons/sandbox/csv/trunk/ apache-commons-csv-1.0
-# tar caf apache-commons-csv-1.0.tar.xz apache-commons-csv-1.0
-Source0:          %{name}-%{version}.tar.xz
-BuildArch:        noarch
-
-BuildRequires:    java-devel >= 0:1.6.0
-BuildRequires:    jpackage-utils
-BuildRequires:    junit4
-BuildRequires:    maven
-BuildRequires:    maven-surefire-provider-junit4
-BuildRequires:    apache-commons-parent
-
-Requires:         java >= 0:1.6.0
-Requires:         jpackage-utils
-Requires(post):   jpackage-utils
-Requires(postun): jpackage-utils
+BuildArch:	noarch
+Obsoletes:	%{name}-javadoc < %{version}
+BuildRequires:	mvn(org.apache.commons:commons-parent:pom::)
+BuildRequires:	mvn(org.apache:apache:pom::)
+BuildRequires:	mvn(commons-io:commons-io)
+BuildRequires:	mvn(commons-codec:commons-codec)
+# Literal, so the first rpmbuild -bs records them before sysjar is installed.
+BuildRequires:	maven
+BuildRequires:	java-current-devel
+BuildSystem:	maven
+BuildOption(install):	--file-name commons-csv --link %{name}
 
 %description
-Commons CSV was started to unify a common and simple interface for
-reading and writing CSV files under an ASL license.
-
-%package javadoc
-Summary:          API documentation for %{name}
-Group:            Development/Java
-Requires:         jpackage-utils
-
-
-%description javadoc
-This package contains the API documentation for %{name}.
+Apache Commons CSV reads and writes CSV files. 1.14.1 replaces the
+sandbox 1.0 snapshot. CSVPrinter.printRecord no longer hangs on a
+parallel stream, and printRecords(ResultSet) writes one record at a
+time under a lock. Tests are skipped.
 
 %prep
-%setup -q
-sed -i 's/\r//' *.txt
-sed -i 's:commons-sandbox-parent:commons-parent:' pom.xml
+%autosetup -n commons-csv-rel-commons-csv-%{version}
+# spotbugs-annotations is optional and not packaged. Maven still
+# resolves it, and CSVPrinter imports the suppression annotation.
+python - <<'PY'
+import re
+from pathlib import Path
 
-%build
-mvn-rpmbuild install javadoc:javadoc
+pom = Path("pom.xml")
+text = pom.read_text()
+text, n = re.subn(
+    r"\s*<dependency>\s*<groupId>com\.github\.spotbugs</groupId>\s*<artifactId>spotbugs-annotations</artifactId>.*?</dependency>",
+    "",
+    text,
+    count=1,
+    flags=re.S,
+)
+if n != 1:
+    raise SystemExit(f"spotbugs dep {n}")
+pom.write_text(text)
 
-%install
-# jars
-install -d -m 755 %{buildroot}%{_javadir}
-install -p -m 644 target/%{short_name}-%{version}-SNAPSHOT.jar %{buildroot}%{_javadir}/%{name}.jar
-ln -sf %{name}.jar %{buildroot}%{_javadir}/%{short_name}.jar
+src = Path("src/main/java/org/apache/commons/csv/CSVPrinter.java")
+body = src.read_text()
+old_import = "import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;\n"
+old_ann = '    @SuppressFBWarnings(value = "AT_NONATOMIC_OPERATIONS_ON_SHARED_VARIABLE", justification = "https://github.com/spotbugs/spotbugs/issues/3428")\n'
+if old_import not in body or old_ann not in body:
+    raise SystemExit("spotbugs annotation not found")
+src.write_text(body.replace(old_import, "", 1).replace(old_ann, "", 1))
+PY
 
-# pom
-install -d -m 755 %{buildroot}%{_mavenpomdir}
-install -pm 644 pom.xml %{buildroot}%{_mavenpomdir}/JPP-%{short_name}.pom
-%add_to_maven_depmap org.apache.commons %{short_name} %{version} JPP %{short_name}
-
-# following line is only for backwards compatibility. New packages
-# should use proper groupid org.apache.commons
-%add_to_maven_depmap %{short_name} %{short_name} %{version} JPP %{short_name}
-
-# javadoc
-install -d -m 755 %{buildroot}%{_javadocdir}/%{name}
-cp -pr target/site/apidocs/* %{buildroot}%{_javadocdir}/%{name}
-
-%post
-%update_maven_depmap
-
-%postun
-%update_maven_depmap
-
-%files
-%defattr(-,root,root,-)
-%doc LICENSE.txt NOTICE.txt
-%{_javadir}/*.jar
-%{_mavenpomdir}/JPP-%{short_name}.pom
-%{_mavendepmapfragdir}/*
-
-%files javadoc
-%defattr(-,root,root,-)
-%doc LICENSE.txt NOTICE.txt
-%doc %{_javadocdir}/%{name}
-
+%files -f .mfiles
+%doc LICENSE.txt NOTICE.txt RELEASE-NOTES.txt README.md
